@@ -1,0 +1,58 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Conversation {
+  createdAt DateTime                @default(now())
+  endTime   DateTime?
+  id        String                  @id @default(auto()) @map("_id") @db.ObjectId
+  messages  Message[]
+  startTime DateTime?
+  status    EnumConversationStatus?
+  updatedAt DateTime                @updatedAt
+}
+
+model Message {
+  chatbotResponses ChatbotResponse[]
+  content          String?
+  conversation     Conversation?     @relation(fields: [conversationId], references: [id])
+  conversationId   String?           @db.ObjectId
+  createdAt        DateTime          @default(now())
+  id               String            @id @default(auto()) @map("_id") @db.ObjectId
+  timestamp        DateTime?
+  updatedAt        DateTime          @updatedAt
+  user             User?             @relation(fields: [userId], references: [id])
+  userId           String?           @db.ObjectId
+}
+
+model ChatbotResponse {
+  createdAt    DateTime @default(now())
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  message      Message? @relation(fields: [messageId], references: [id])
+  messageId    String?  @db.ObjectId
+  responseText String?
+  updatedAt    DateTime @updatedAt
+}
+
+model User {
+  createdAt DateTime  @default(now())
+  email     String?   @unique
+  firstName String?
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  lastName  String?
+  messages  Message[]
+  name      String?
+  password  String
+  roles     Json
+  updatedAt DateTime  @updatedAt
+  username  String    @unique
+}
+
+enum EnumConversationStatus {
+  Option1
+}
